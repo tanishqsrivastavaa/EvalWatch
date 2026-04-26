@@ -5,9 +5,10 @@ from app.db.session import get_session
 from app.models.observe import llm_traces
 from app.schemas.observe import input_lmm_traces
 from app.crud.user import get_user_by_email
+import math
 
-
-
+MAX_LIMIT = 10
+OFFSET = 0
 
 router = APIRouter()
 
@@ -37,11 +38,25 @@ def insert_llm_trace(
 @router.get("/all_logs")
 def get_all_llm_trace(
     model_name: Optional[str] = None,
+    min_latency : Optional[int] = None,
+    limit : Optional[int] = 10,
+    offset: Optional[int] = 0,
     session : Session = Depends(get_session)
 ):
     statement = select(llm_traces)
+
+    #FILTERS
     if model_name:
-        statement = select(llm_traces).where(llm_traces.model_name == model_name)
+        statement = statement.where(llm_traces.model_name == model_name)
+
+    if min_latency:
+        statement  = statement.where(llm_traces.latency_ms >= min_latency) 
+
+    #PAGINATION
+    limit = min(limit,MAX_LIMIT)
+    statement = statement.offset(offset)
+    statement = statement.limit(limit)
+
     result = session.exec(statement)
     data = result.all()
     return data

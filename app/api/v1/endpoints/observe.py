@@ -1,11 +1,11 @@
-from typing import Annotated, Optional
+from typing import  Optional
 from fastapi import Depends, APIRouter
 from sqlmodel import Session, select
 from app.db.session import get_session
 from app.models.observe import llm_traces
 from app.schemas.observe import input_lmm_traces
-from app.crud.user import get_user_by_email
-import math
+from app.crud.user import get_user_by_email #did not add user auth to protect the endpoints.
+
 
 MAX_LIMIT = 10
 OFFSET = 0
